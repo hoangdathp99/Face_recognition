@@ -1,0 +1,92 @@
+import cv2
+import numpy as np
+import imutils
+import face_recognition
+from imutils import paths
+import matplotlib.pyplot as plt
+import os
+from collections import Counter
+import time
+import hnswlib
+from constant import DIM, NUM_ELEMENTS, FX, FY
+
+output_name = []
+known_face_names = []
+video_capture = cv2.VideoCapture(0)
+p = hnswlib.Index(space='l2', dim=DIM)  # the space can be changed - keeps the data, alters the distance function.
+p.load_index("images.bin", max_elements = NUM_ELEMENTS)
+imagePaths = list(paths.list_images('images'))
+max_time = int ('5')
+
+for i, imagePath in enumerate(imagePaths):
+    name = imagePath.split(os.path.sep)[-2]
+    known_face_names.append(name)
+
+class Person:
+  def __init__(self, name, status):
+    self.name = name
+    self.status = status
+    
+
+p1 = Person("DATHOANG", "Vang",)
+def append_names(frame):
+    
+        frame = cv2.flip(frame, 1)
+        small_frame = cv2.resize(frame, (0, 0), fx=FX, fy=FY)
+        rgb_small_frame = small_frame[:, :, ::-1]
+
+        face_locations = face_recognition.face_locations(rgb_small_frame)
+        face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+        face_names = []
+
+        for face_encoding in face_encodings:
+            labels, distances = p.knn_query(np.expand_dims(face_encoding, axis = 0), k = 1)
+            known_face_encoding = p.get_items([labels])
+            name = "unknown"
+            if distances < 0.13:
+                name = known_face_names[labels[0][0]]
+                if name == p1.name:
+                    p1.status = "Da dd"
+            face_names.append(name)
+            
+        #Draw rectangle in faces 
+        for (top, right, bottom, left), name in zip(face_locations, face_names):
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+            font = cv2.FONT_HERSHEY_DUPLEX
+            cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+            
+            cv2.imshow('Video', frame)
+            if(cv2.waitKey(1) & 0xFF == ord('q')):
+                break
+
+        return face_names
+
+start_time = time.time()
+
+while True:  
+    ret, frame = video_capture.read()
+    #Test
+    names =  append_names(frame)
+    # print(p1.name)
+    # print(p1.status)
+    # print(names)
+    # if (len(names) == 0):
+    #     if (time.time() - start_time) > max_time:
+    #         cv2.VideoCapture.release()
+    #         cv2.destroyAllWindows()
+    # else:
+    #     start_time = time.time()
+    
+    #  if (len(names) == 0) :
+    #     if (time.time() - start_time) > max_time:
+    #         cv2.VideoCapture.release()
+    #         cv2.destroyAllWindows()
+
+
+        
+        
