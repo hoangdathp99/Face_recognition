@@ -22,13 +22,7 @@ for i, imagePath in enumerate(imagePaths):
     name = imagePath.split(os.path.sep)[-2]
     known_face_names.append(name)
 
-class Person:
-  def __init__(self, name, status):
-    self.name = name
-    self.status = status
-    
 
-p1 = Person("DATHOANG", "Vang",)
 def append_names(frame):
     
         frame = cv2.flip(frame, 1)
@@ -45,8 +39,8 @@ def append_names(frame):
             name = "unknown"
             if distances < 0.13:
                 name = known_face_names[labels[0][0]]
-                if name == p1.name:
-                    p1.status = "Da dd"
+                
+                    
             face_names.append(name)
             
         #Draw rectangle in faces 
@@ -72,15 +66,12 @@ while True:
     ret, frame = video_capture.read()
     #Test
     names =  append_names(frame)
-    # print(p1.name)
-    # print(p1.status)
-    # print(names)
-    # if (len(names) == 0):
-    #     if (time.time() - start_time) > max_time:
-    #         cv2.VideoCapture.release()
-    #         cv2.destroyAllWindows()
-    # else:
-    #     start_time = time.time()
+    if (len(names) == 0):
+        if (time.time() - start_time) > max_time:
+            cv2.VideoCapture.release()
+            cv2.destroyAllWindows()
+    else:
+        start_time = time.time()
     
     #  if (len(names) == 0) :
     #     if (time.time() - start_time) > max_time:
