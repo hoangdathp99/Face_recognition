@@ -23,34 +23,24 @@ if not os.path.exists(directory):
 number_of_images = 0
 count = 0
 
-while number_of_images < MAX_NUMBER_OF_IMAGES:
+while number_of_images < 10:
 	ret, frame = video_capture.read()
-
 	frame = cv2.flip(frame, 1)
-
 	frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-	#faces = face_cascade.detectMultiScale(frame, 1.3, 5)
 	faces = detector(frame_gray)
-	# D
-    #    cv2.line(frame, (lines[0][0],lines[0][1]) , (lines[4][0],lines[4][1]), (193, 42, 77), 2)
-    #    cv2.circle(frame, (x_line, y_line), 5, (0, 0, 255), -1)
 	if len(faces) == 1:
 		face = faces[0]
 		(x, y, w, h) = face_utils.rect_to_bb(face)
-		face_img = frame_gray[y-50:y + h+100, x-50:x + w+100]
+		face_img = frame_gray[y:y + h+1000, x:x + w+1000]
 		face_aligned = face_aligner.align(frame, frame_gray, face)
 
-		if count == 5:
+		if count == 1:
 			cv2.imwrite(os.path.join(directory, str(name+str(number_of_images)+'.jpg')), face_aligned)
 			number_of_images += 1
 			count = 0
 		print(count)
 		count+=1
-		
-
 	cv2.imshow('Video', frame)
-
 	if(cv2.waitKey(1) & 0xFF == ord('q')):
 		break
 
